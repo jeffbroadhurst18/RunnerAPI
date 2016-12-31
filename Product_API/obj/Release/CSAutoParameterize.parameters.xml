@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="Albums-Web.config Connection String" description="Albums Connection String used in web.config by the application to access the database." defaultValue="Data Source=BROADHURST_WIN8\BROADHURST;Initial Catalog=JeffData;Integrated Security=True;" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Users\\Jeff\\documents\\visual\ studio\ 2015\\Projects\\Product_API\\Product_API\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='Albums']/@connectionString" />
+  </parameter>
+</parameters>
