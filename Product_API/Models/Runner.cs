@@ -4,7 +4,8 @@
     {
         public int id { get; set; }
         public string name { get; set; }
-        public string sex { get; set; }
-        public string age { get; set; }
+        public int sex { get; set; }
+        public int age { get; set; }
+        public int best { get; set; }
     }
 }

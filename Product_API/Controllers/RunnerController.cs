@@ -1,13 +1,10 @@
 ﻿using Product_API.Models;
-using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace Product_API.Controllers
 {
@@ -31,6 +28,16 @@ namespace Product_API.Controllers
         {
             return "value";
         }
+
+
+
+        public List<Runner> Get([FromUri] string name)
+        {
+
+            return SearchRunners(name);
+
+        }
+
 
         // POST: api/Runner
         [HttpPost]
@@ -61,7 +68,7 @@ namespace Product_API.Controllers
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                var sqlString = "select id,name,sex,age from dbo.Runners";
+                var sqlString = "select id,name,sex,age,best from dbo.Runners";
                 SqlCommand command = new SqlCommand(sqlString, connection);
                 connection.Open();
 
@@ -73,8 +80,9 @@ namespace Product_API.Controllers
                         {
                             id = (int)reader[0],
                             name = reader[1].ToString(),
-                            sex = reader[2].ToString(),
-                            age = reader[3].ToString()
+                            sex = (int)reader[2],
+                            age = (int)reader[3],
+                            best = (int)reader[4]
                         };
 
                         runners.Add(runner);
@@ -93,7 +101,7 @@ namespace Product_API.Controllers
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                var sqlString = "select id,name,sex,age from dbo.Runners where id=@id";
+                var sqlString = "select id,name,sex,age,best from dbo.Runners where id=@id";
                 SqlCommand command = new SqlCommand(sqlString, connection);
                 command.Parameters.AddWithValue("@id", id);
                 connection.Open();
@@ -106,8 +114,9 @@ namespace Product_API.Controllers
                         {
                             id = (int)reader[0],
                             name = reader[1].ToString(),
-                            sex = reader[2].ToString(),
-                            age = reader[3].ToString()
+                            sex = (int)reader[2],
+                            age = (int)reader[3],
+                            best = (int)reader[4]
                         };
 
                         runners.Add(runner);
@@ -119,15 +128,50 @@ namespace Product_API.Controllers
             }
         }
 
+        private List<Runner> SearchRunners(string searchTerm)
+        {
+            Runner runner;
+            List<Runner> runners = new List<Runner>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                var sqlString = "select id,name,sex,age,best from dbo.Runners where name like @searchTerm";
+                SqlCommand command = new SqlCommand(sqlString, connection);
+                command.Parameters.AddWithValue("@searchTerm", "%" + searchTerm + "%");
+                connection.Open();
+                                
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        runner = new Runner
+                        {
+                            id = (int)reader[0],
+                            name = reader[1].ToString(),
+                            sex = (int)reader[2],
+                            age = (int)reader[3],
+                            best = (int)reader[4]
+                        };
+
+                        runners.Add(runner);
+                    }
+                }
+
+                connection.Close();
+                return runners;
+            }
+        }
+
         private void UpdateRunner(Runner runner)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                var sqlString = "update dbo.Runners set name=@name,age=@age,sex=@sex where id=@id";
+                var sqlString = "update dbo.Runners set name=@name,age=@age,sex=@sex,best=@best where id=@id";
                 SqlCommand command = new SqlCommand(sqlString, connection);
                 command.Parameters.AddWithValue("@name", runner.name);
                 command.Parameters.AddWithValue("@age", runner.age);
                 command.Parameters.AddWithValue("@sex", runner.sex);
+                command.Parameters.AddWithValue("@best", runner.best);
                 command.Parameters.AddWithValue("@id", runner.id);
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -139,11 +183,12 @@ namespace Product_API.Controllers
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                var sqlString = "insert dbo.Runners (name,age,sex) values (@name,@age,@sex)";
+                var sqlString = "insert dbo.Runners (name,age,sex,best) values (@name,@age,@sex,@best)";
                 SqlCommand command = new SqlCommand(sqlString, connection);
                 command.Parameters.AddWithValue("@name", runner.name);
                 command.Parameters.AddWithValue("@age", runner.age);
                 command.Parameters.AddWithValue("@sex", runner.sex);
+                command.Parameters.AddWithValue("@best", runner.best);
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
